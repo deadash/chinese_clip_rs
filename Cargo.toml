@@ -1,11 +1,27 @@
 [package]
-name = "chinese_clip"
+name = "chinese_clip_rs"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+cuda = ["ort/cuda"]
+tensorrt = ["ort/tensorrt"]
+openvino = ["ort/openvino"]
+directml = ["ort/directml"]
+
 [dependencies]
-ort = "=2.0.0-rc.7"
+ort = { version = "=2.0.0-rc.7", features = ["load-dynamic"] }
 anyhow = "1.0"
 image = "0.25"
 ndarray = "0.16"
 tokenizers = { version = "0.20", default-features = false, features = [ "onig" ] }
+tracing-subscriber = "0.3.18"
+tracing = "0.1.40"
+
+[lib]
+name = "chinese_clip_rs"
+path = "src/lib.rs"
+
+[[bin]]
+name = "demo"
+path = "src/bin/demo.rs"

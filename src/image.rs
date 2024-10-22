@@ -1,23 +1,28 @@
-use std::collections::HashMap;
-
 use anyhow::Result;
 use ndarray::{Array, ArrayView};
 use ort::{GraphOptimizationLevel, Session};
+use std::collections::HashMap;
 
-pub fn get_image_feature(image_path: &str) -> Result<Vec<f32>> {
+pub fn get_image_feature(
+    image_path: &str,
+    model_path: &str,
+    resolution: (u32, u32),
+) -> Result<Vec<f32>> {
+    let (width, height) = resolution;
+
     // 加载ONNX模型
     let session = Session::builder()?
         .with_optimization_level(GraphOptimizationLevel::Level3)?
         .with_intra_threads(4)?
-        .commit_from_file("models/clip_cn_vit-l-14.img.fp32.onnx")?;
+        .commit_from_file(model_path)?;
 
     // 读取并预处理图片
     let img = image::ImageReader::open(image_path)?.decode()?;
-    let img = img.resize_exact(224, 224, image::imageops::FilterType::Lanczos3);
+    let img = img.resize_exact(width, height, image::imageops::FilterType::Lanczos3);
     let img = img.to_rgb8();
 
     // 转换为张量并归一化
-    let mut img_tensor = Array::from_shape_fn((1, 3, 224, 224), |(_, c, y, x)| {
+    let mut img_tensor = Array::from_shape_fn((1, 3, height as usize, width as usize), |(_, c, y, x)| {
         let pixel = img.get_pixel(x as u32, y as u32);
         pixel[c] as f32 / 255.0
     });

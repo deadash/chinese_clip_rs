@@ -1,19 +1,18 @@
-use std::collections::HashMap;
-
 use anyhow::Result;
 use ndarray::{Array, ArrayView};
 use ort::{GraphOptimizationLevel, Session};
+use std::collections::HashMap;
 use tokenizers::Tokenizer;
 
-pub fn get_text_feature(text: &str) -> Result<Vec<f32>> {
+pub fn get_text_feature(text: &str, model_path: &str, tokenizer_path: &str) -> Result<Vec<f32>> {
     // 加载ONNX模型
     let session = Session::builder()?
         .with_optimization_level(GraphOptimizationLevel::Level3)?
         .with_intra_threads(4)?
-        .commit_from_file("models/clip_cn_vit-l-14.txt.fp32.onnx")?;
+        .commit_from_file(model_path)?;
 
     // 使用tokenizer对文本进行编码
-    let tokenizer = Tokenizer::from_file("models/clip_cn_tokenizer.json").unwrap();
+    let tokenizer = Tokenizer::from_file(tokenizer_path).unwrap();
     let encoding = tokenizer.encode(text, true).unwrap();
     let mut input_ids = encoding.get_ids().to_vec();
     input_ids.resize(52, 0); // 填充到52个token
@@ -23,7 +22,6 @@ pub fn get_text_feature(text: &str) -> Result<Vec<f32>> {
         .map(|&x| x as i64);
 
     // 运行推理
-    // 将 input_tensor 转换为 ort::Value
     let input_value = ort::Value::from_array(input_tensor.into_dyn())?;
     let mut inputs = HashMap::new();
     inputs.insert("text".to_string(), input_value);
