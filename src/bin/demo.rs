@@ -1,5 +1,5 @@
 use anyhow::Result;
-use chinese_clip_rs::{get_image_feature, get_text_feature, calculate_similarity, softmax};
+use chinese_clip_rs::{calculate_similarity, softmax, ImageProcessor, TextProcessor};
 use std::time::Instant;
 
 fn main() -> Result<()> {
@@ -47,17 +47,22 @@ fn main() -> Result<()> {
 
     let start_time = Instant::now();
 
-    let image_features = get_image_feature(image_path, image_model_path, (224, 224))?;
+    // 创建 ImageProcessor 实例
+    let image_processor = ImageProcessor::new(image_model_path, (224, 224))?;
+    let image_features = image_processor.process_file(image_path)?;
     
     let image_time = start_time.elapsed();
     tracing::info!("获取图像特征耗时: {:?}", image_time);
+
+    // 创建 TextProcessor 实例
+    let text_processor = TextProcessor::new(text_model_path, tokenizer_path, 52)?;
 
     let pokemon_names = vec!["杰尼龟", "妙蛙种子", "小火龙", "皮卡丘"];
     
     let mut all_logits = Vec::new();
     for name in &pokemon_names {
         let text_start_time = Instant::now();
-        let text_features = get_text_feature(name, text_model_path, tokenizer_path)?;
+        let text_features = text_processor.process_text(name)?;
         let text_time = text_start_time.elapsed();
         tracing::info!("获取文本特征 '{}' 耗时: {:?}", name, text_time);
 
