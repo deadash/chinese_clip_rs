@@ -10,7 +10,7 @@ openvino = ["ort/openvino"]
 directml = ["ort/directml"]
 
 [dependencies]
-ort = { version = "=2.0.0-rc.7" }
+ort = { version = "=2.0.0-rc.7", features = ["load-dynamic"] }
 anyhow = "1.0"
 image = "0.25"
 ndarray = "0.16"

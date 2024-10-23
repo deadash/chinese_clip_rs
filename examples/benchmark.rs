@@ -8,6 +8,9 @@ use clap::Parser;
 struct Args {
     #[arg(short, long)]
     provider: Option<String>,
+
+    #[arg(long)]
+    openvino_device: Option<String>,
 }
 
 fn main() -> Result<()> {
@@ -36,7 +39,19 @@ fn main() -> Result<()> {
             #[cfg(feature = "openvino")]
             {
                 use ort::OpenVINOExecutionProvider;
-                providers.push(OpenVINOExecutionProvider::default().build());
+                let mut openvino_provider = OpenVINOExecutionProvider::default();
+                
+                if let Some(device) = &args.openvino_device {
+                    match device.as_str() {
+                        "CPU" => openvino_provider = openvino_provider.with_device_type("CPU"),
+                        "GPU" => openvino_provider = openvino_provider.with_device_type("GPU"),
+                        "iGPU" => openvino_provider = openvino_provider.with_device_type("GPU.0"),
+                        "dGPU" => openvino_provider = openvino_provider.with_device_type("GPU.1"),
+                        _ => return Err(anyhow::anyhow!("不支持的OpenVINO设备类型: {}", device)),
+                    }
+                }
+
+                providers.push(openvino_provider.build());
             }
         }
         Some("directml") => {
