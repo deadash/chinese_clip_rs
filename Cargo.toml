@@ -10,18 +10,23 @@ openvino = ["ort/openvino"]
 directml = ["ort/directml"]
 
 [dependencies]
-ort = { version = "=2.0.0-rc.7", features = ["load-dynamic"] }
+ort = { version = "=2.0.0-rc.7" }
 anyhow = "1.0"
 image = "0.25"
 ndarray = "0.16"
 tokenizers = { version = "0.20", default-features = false, features = [ "onig" ] }
-tracing-subscriber = "0.3.18"
-tracing = "0.1.40"
+
+[dev-dependencies]
+tracing-subscriber = "0.3"
+tracing = "0.1"
+clap = { version = "4.5", features = ["derive"] }
 
 [lib]
 name = "chinese_clip_rs"
 path = "src/lib.rs"
 
-[[bin]]
+[[example]]
 name = "demo"
-path = "src/bin/demo.rs"
+
+[[example]]
+name = "benchmark"

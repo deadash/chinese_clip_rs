@@ -1,4 +1,4 @@
-use anyhow::Result;
+﻿use anyhow::Result;
 use chinese_clip_rs::{calculate_similarity, softmax, ImageProcessor, TextProcessor};
 use std::time::Instant;
 
